@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
+
+from app.models.ad_model import AdModel
+from app.services.ad_service import AdService, get_ad_service
 
 router = APIRouter(prefix="/ads", tags=["Ads"])
 
@@ -23,5 +26,8 @@ async def get_statistics_about_car(brand: str = Path(description="Car brand", ex
 
 
 @router.get("")
-async def get_ad_by_link(link: str = Query(description="URL to the ad", example="https://auto.ria.com/uk/auto_jaguar_f_pace_12344321.html")):
+async def get_ad_by_link(link: str = Query(description="URL to the ad", example="https://auto.ria.com/uk/auto_jaguar_f_pace_12344321.html"),
+                         service: AdService = Depends(get_ad_service)):
+    service.save_ad(AdModel(name="test", price=228.0, model="model", brand="brand", region="52",
+                    mileage="1000000", color="green", interior="yes", contacts="+12341234123"))
     return f"link to ad: {link}"
