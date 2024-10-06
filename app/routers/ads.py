@@ -31,3 +31,10 @@ async def get_ad_by_link(link: str = Query(description="URL to the ad", example=
     service.save_ad(AdModel(name="test", price=228.0, model="model", brand="brand", region="52",
                     mileage="1000000", color="green", interior="yes", contacts="+12341234123"))
     return f"link to ad: {link}"
+
+
+@router.get("/autoria/{id}")
+async def get_ad_from_autoria_by_id(id: int, service: AdService = Depends(get_ad_service)):
+    # service.save_ad(AdModel(name="test", price=228.0, model="model", brand="brand", region="52",
+    #                 mileage="1000000", color="green", interior="yes", contacts="+12341234123"))
+    return f"id of ad: {id}"

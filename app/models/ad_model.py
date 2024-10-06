@@ -6,13 +6,11 @@ from app.database import Base
 class AdModel(Base):
     __tablename__ = "ads"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
+    platform = Column(String, primary_key=True)
+    category = Column(String, primary_key=True)
+    brand = Column(String, primary_key=True)
+    model = Column(String, primary_key=True)
     price = Column(Float)
-    model = Column(String)
-    brand = Column(String)
     region = Column(String)
     mileage = Column(Integer)
     color = Column(String)
-    interior = Column(String)
-    contacts = Column(String)

@@ -2,15 +2,14 @@ from pydantic import BaseModel
 
 
 class AdBase(BaseModel):
-    name: str
-    price: float
-    model: str
+    platform: str
+    category: str
     brand: str
+    model: str
+    price: float
     region: str
     mileage: int
     color: str
-    interior: str
-    contacts: str
 
 
 class AdCreate(AdBase):
@@ -18,7 +17,5 @@ class AdCreate(AdBase):
 
 
 class Ad(AdBase):
-    id: int
-
     class Config:
         orm_mode = True
