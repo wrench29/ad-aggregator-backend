@@ -7,7 +7,7 @@ from app.models import ad_model
 
 
 class AdRepository:
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session):
         self.db = db
 
     def create_ad(self, ad: ad_schema.Ad) -> ad_model.AdModel:
