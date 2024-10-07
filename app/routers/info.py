@@ -12,7 +12,12 @@ from app.services.info_service import InfoService, get_info_service
 from app.utils import AdsPeriod, Provider
 
 
-router = APIRouter(prefix="/info", tags=["Info"])
+router = APIRouter(prefix="/info",
+                   tags=["Info"],
+                   responses={
+                       401: {'name': 'Unauthorized'}
+
+                   })
 
 
 @router.get("/providers")

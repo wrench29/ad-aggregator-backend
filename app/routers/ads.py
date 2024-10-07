@@ -8,7 +8,11 @@ from app.schemas.user_schema import User
 from app.services.ad_service import AdService, get_ad_service
 from app.utils import Provider, provider_from_str
 
-router = APIRouter(prefix="/ads", tags=["Ads"])
+router = APIRouter(prefix="/ads",
+                   tags=["Ads"],
+                   responses={
+                       401: {'name': 'Unauthorized'}
+                   })
 
 
 def verify_provider(provider_str: str) -> Provider:

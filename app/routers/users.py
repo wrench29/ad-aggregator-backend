@@ -29,7 +29,9 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.get("/me")
+@router.get("/me", responses={
+    401: {'name': 'Unauthorized'}
+})
 async def read_users_me(
     current_user: Annotated[User, Depends(auth.get_current_user)],
 ):
