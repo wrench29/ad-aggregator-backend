@@ -9,4 +9,5 @@ class AutoriaAdsCountStatisticsModel(Base):
     category_id = Column(Integer, primary_key=True)
     brand_id = Column(Integer, primary_key=True)
     model_id = Column(Integer, primary_key=True)
+    period = Column(Integer, primary_key=True)
     ads_count = Column(Integer)

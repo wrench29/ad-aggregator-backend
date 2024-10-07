@@ -21,10 +21,11 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         'ads',
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('platform', sa.String, primary_key=True),
-        sa.Column('category', sa.String, primary_key=True),
-        sa.Column('brand', sa.String, primary_key=True),
-        sa.Column('model', sa.String, primary_key=True),
+        sa.Column('category', sa.String),
+        sa.Column('brand', sa.String),
+        sa.Column('model', sa.String),
         sa.Column('price', sa.Float),
         sa.Column('region', sa.String),
         sa.Column('mileage', sa.Integer),
