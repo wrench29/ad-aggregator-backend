@@ -8,11 +8,7 @@ from app.schemas.ads_count_statistics_schema import AdsCountStatistics
 from app.schemas.brand_schema import Brand
 from app.schemas.category_schema import Category
 from app.schemas.model_schema import Model
-from app.utils import AdsPeriod
-
-
-class Provider(Enum):
-    AUTORIA = 1
+from app.utils import AdsPeriod, Provider
 
 
 class InfoService():

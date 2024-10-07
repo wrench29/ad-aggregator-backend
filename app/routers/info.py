@@ -1,7 +1,15 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
-from app.services.info_service import InfoService, Provider, get_info_service
-from app.utils import AdsPeriod
+from app import auth
+from app.schemas.ad_prices_statistics import AdsPricesStatistics
+from app.schemas.ads_count_statistics_schema import AdsCountStatistics
+from app.schemas.brand_schema import Brand
+from app.schemas.category_schema import Category
+from app.schemas.model_schema import Model
+from app.schemas.user_schema import User
+from app.services.info_service import InfoService, get_info_service
+from app.utils import AdsPeriod, Provider
 
 
 router = APIRouter(prefix="/info", tags=["Info"])
@@ -12,8 +20,9 @@ async def get_available_providers():
     return ['autoria']
 
 
-@router.get("/{provider}/categories")
+@router.get("/{provider}/categories", response_model=list[Category])
 async def get_categories_from_provider(
+    current_user: Annotated[User, Depends(auth.get_current_user)],
     provider: str = Path(description='Info provider', example='autoria'),
     service: InfoService = Depends(get_info_service)
 ):
@@ -24,8 +33,9 @@ async def get_categories_from_provider(
             return HTTPException(404, detail='Provider does not exist')
 
 
-@router.get("/{provider}/{category_id}/brands")
+@router.get("/{provider}/{category_id}/brands", response_model=list[Brand])
 async def get_brands_from_provider(
+    current_user: Annotated[User, Depends(auth.get_current_user)],
     provider: str = Path(description='Info provider', example='autoria'),
     category_id: int = Path(),
     service: InfoService = Depends(get_info_service)
@@ -37,8 +47,9 @@ async def get_brands_from_provider(
             return HTTPException(404, detail='Provider does not exist')
 
 
-@router.get("/{provider}/{category_id}/{brand_id}/models")
+@router.get("/{provider}/{category_id}/{brand_id}/models", response_model=list[Model])
 async def get_models_from_provider(
+    current_user: Annotated[User, Depends(auth.get_current_user)],
     provider: str = Path(description='Info provider', example='autoria'),
     category_id: int = Path(),
     brand_id: int = Path(),
@@ -51,12 +62,15 @@ async def get_models_from_provider(
             return HTTPException(404, detail='Provider does not exist')
 
 
-@router.get("/prices/{provider}/{category_id}/{brand_id}/{model_id}")
-async def get_price_statistics_about_car(provider: str = Path(),
-                                         category_id: int = Path(),
-                                         brand_id: int = Path(),
-                                         model_id: int = Path(),
-                                         service: InfoService = Depends(get_info_service)):
+@router.get("/{provider}/{category_id}/{brand_id}/{model_id}/prices", response_model=AdsPricesStatistics)
+async def get_price_statistics_about_car(current_user: Annotated[User, Depends(auth.get_current_user)],
+                                         provider: str = Path(
+                                             description='Info provider', example='autoria'
+),
+        category_id: int = Path(),
+        brand_id: int = Path(),
+        model_id: int = Path(),
+        service: InfoService = Depends(get_info_service)):
     match provider:
         case 'autoria':
             statistics = service.get_price_statistics(
@@ -72,8 +86,10 @@ async def get_price_statistics_about_car(provider: str = Path(),
             return HTTPException(404, detail='Provider does not exist')
 
 
-@router.get("/ads_count/{provider}/{category_id}/{brand_id}/{model_id}")
-async def get_ads_statistics_about_car(provider: str = Path(),
+@router.get("/{provider}/{category_id}/{brand_id}/{model_id}/ads_count", response_model=AdsCountStatistics)
+async def get_ads_statistics_about_car(current_user: Annotated[User, Depends(auth.get_current_user)],
+                                       provider: str = Path(
+                                           description='Info provider', example='autoria'),
                                        category_id: int = Path(),
                                        brand_id: int = Path(),
                                        model_id: int = Path(),

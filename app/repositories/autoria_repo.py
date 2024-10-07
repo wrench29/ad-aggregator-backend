@@ -28,15 +28,18 @@ class AutoriaRepository:
         cache_key = f'ad_autoria_{id}'
         is_outdated = self.cache_info_repo.is_cache_outdated(cache_key)
         if not is_outdated:
-            ad = self.db.query(AdModel).first()
+            ad = self.db.query(AdModel).filter(
+                AdModel.id == id, AdModel.platform == 'autoria').first()
             return ad
         self.db.query(AdModel).filter(
-            AdModel.id == id and AdModel.platform == 'autoria').delete()
+            AdModel.id == id, AdModel.platform == 'autoria').delete()
         url = f'{self.__BASE_URL}auto/info?auto_id={id}&api_key={self.__token}'
         json = AutoriaRepository.__make_request(url)
+        self.get_categories()
         category_name = self.db.query(AutoriaCategoryModel).filter(
             AutoriaCategoryModel.id == json["autoData"]["categoryId"]).first().name
         ad_model = AdModel(
+            id=id,
             platform='autoria',
             category=category_name,
             price=json["UAH"],
@@ -58,7 +61,7 @@ class AutoriaRepository:
         if not is_outdated:
             categories = self.db.query(AutoriaCategoryModel).all()
             return categories
-        AutoriaCategoryModel.query().delete()
+        self.db.query(AutoriaCategoryModel).delete()
         url = f'{self.__BASE_URL}auto/categories?api_key={self.__token}'
         json = AutoriaRepository.__make_request(url)
         categories = []
@@ -90,7 +93,6 @@ class AutoriaRepository:
             f'api_key={self.__token}'
         )
         json = AutoriaRepository.__make_request(url)
-        print(json)
         brands = []
         for entry in json:
             brands.append(
@@ -112,7 +114,8 @@ class AutoriaRepository:
         is_outdated = self.cache_info_repo.is_cache_outdated(cache_key)
         if not is_outdated:
             models = self.db.query(AutoriaModelModel).filter(
-                AutoriaModelModel.category_id == category_id).all()
+                AutoriaModelModel.category_id == category_id,
+                AutoriaModelModel.brand_id == brand_id).all()
             return models
         self.db.query(AutoriaModelModel).filter(
             AutoriaModelModel.category_id == category_id).delete()
@@ -151,31 +154,31 @@ class AutoriaRepository:
         is_outdated = self.cache_info_repo.is_cache_outdated(cache_key)
         if not is_outdated:
             model = self.db.query(AutoriaAdsCountStatisticsModel).filter(
-                AutoriaAdsCountStatisticsModel.category_id == category_id and
-                AutoriaAdsCountStatisticsModel.brand_id == brand_id and
-                AutoriaAdsCountStatisticsModel.model_id == model_id and
+                AutoriaAdsCountStatisticsModel.category_id == category_id,
+                AutoriaAdsCountStatisticsModel.brand_id == brand_id,
+                AutoriaAdsCountStatisticsModel.model_id == model_id,
                 AutoriaAdsCountStatisticsModel.period == top
             ).first()
             return model
         self.db.query(AutoriaAdsCountStatisticsModel).filter(
-            AutoriaAdsCountStatisticsModel.category_id == category_id and
-            AutoriaAdsCountStatisticsModel.brand_id == brand_id and
-            AutoriaAdsCountStatisticsModel.model_id == model_id and
+            AutoriaAdsCountStatisticsModel.category_id == category_id,
+            AutoriaAdsCountStatisticsModel.brand_id == brand_id,
+            AutoriaAdsCountStatisticsModel.model_id == model_id,
             AutoriaAdsCountStatisticsModel.period == top
         ).delete()
         url = (
             f'{self.__BASE_URL}auto/search?order_by=2&category_id={category_id}&'
-            f'marka_id[0]={brand_id} & model_id[0]='
-            f'{model_id} & top={top} & api_key={self.__token}'
+            f'marka_id[0]={brand_id}&model_id[0]={model_id}&'
+            f'top={top}&api_key={self.__token}'
         )
         json = AutoriaRepository.__make_request(url)
         ads_count = json["result"]["search_result"]["count"]
         statistics = AutoriaAdsCountStatisticsModel(
-            category_id,
-            brand_id,
-            model_id,
-            top,
-            ads_count
+            category_id=category_id,
+            brand_id=brand_id,
+            model_id=model_id,
+            period=top,
+            ads_count=ads_count
         )
         self.db.add(statistics)
         self.db.commit()
@@ -194,28 +197,35 @@ class AutoriaRepository:
         is_outdated = self.cache_info_repo.is_cache_outdated(cache_key)
         if not is_outdated:
             model = self.db.query(AutoriaPriceStatisticsModel).filter(
-                AutoriaPriceStatisticsModel.category_id == category_id and
-                AutoriaPriceStatisticsModel.brand_id == brand_id and
+                AutoriaPriceStatisticsModel.category_id == category_id,
+                AutoriaPriceStatisticsModel.brand_id == brand_id,
                 AutoriaPriceStatisticsModel.model_id == model_id
             ).first()
             return model
         self.db.query(AutoriaPriceStatisticsModel).filter(
-            AutoriaPriceStatisticsModel.category_id == category_id and
-            AutoriaPriceStatisticsModel.brand_id == brand_id and
+            AutoriaPriceStatisticsModel.category_id == category_id,
+            AutoriaPriceStatisticsModel.brand_id == brand_id,
             AutoriaPriceStatisticsModel.model_id == model_id
         ).delete()
-        url = (
+        url_get_cheapest = (
             f'{self.__BASE_URL}auto/search?order_by=2&'
             f'category_id={category_id}&marka_id[0]={brand_id}'
             f'&model_id[0]={model_id}&api_key={self.__token}'
         )
-        json = AutoriaRepository.__make_request(url)
-        ads = json["result"]["search_result"]["ids"]
-        if len(ads) == 0:
+        url_get_expensive = (
+            f'{self.__BASE_URL}auto/search?order_by=3&'
+            f'category_id={category_id}&marka_id[0]={brand_id}'
+            f'&model_id[0]={model_id}&api_key={self.__token}'
+        )
+        json_cheapest = AutoriaRepository.__make_request(url_get_cheapest)
+        json_expensive = AutoriaRepository.__make_request(url_get_expensive)
+        ads_cheapest = json_cheapest["result"]["search_result"]["ids"]
+        ads_expensive = json_expensive["result"]["search_result"]["ids"]
+        if len(ads_cheapest) == 0:
             self.db.commit()
             return None
-        min_price_ad_id = ads[0]
-        max_price_ad_id = ads[len(ads) - 1]
+        min_price_ad_id = ads_cheapest[0]
+        max_price_ad_id = ads_expensive[0]
         min_price_ad = self.get_ad(min_price_ad_id)
         max_price_ad = self.get_ad(max_price_ad_id)
 

@@ -1,7 +1,9 @@
+from datetime import datetime
 from pydantic import BaseModel
 
 
 class AdBase(BaseModel):
+    id: int
     platform: str
     category: str
     brand: str
@@ -19,3 +21,12 @@ class AdCreate(AdBase):
 class Ad(AdBase):
     class Config:
         orm_mode = True
+
+
+class AdToSave(BaseModel):
+    id: int
+    provider: str
+
+
+class SavedAd(AdBase):
+    save_time: datetime
