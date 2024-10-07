@@ -16,7 +16,7 @@ router = APIRouter(prefix="/info", tags=["Info"])
 
 
 @router.get("/providers")
-async def get_available_providers():
+async def get_available_providers(current_user: Annotated[User, Depends(auth.get_current_user)]):
     return ['autoria']
 
 
