@@ -33,3 +33,8 @@ May require to enable remote script execution.
 
 `(.venv) $ fastapi dev app/main.py`
 
+#### View docs
+
+http://localhost:8000/docs
+
+http://localhost:8000/redoc

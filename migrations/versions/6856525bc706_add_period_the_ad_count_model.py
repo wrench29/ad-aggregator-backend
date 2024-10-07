@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     with op.batch_alter_table('autoria_ads_count_statistics') as batch_op:
-        batch_op.add_column(sa.Column('period', sa.Integer))
+        batch_op.add_column(sa.Column('period', sa.Integer, primary_key=True))
 
 
 def downgrade() -> None:
