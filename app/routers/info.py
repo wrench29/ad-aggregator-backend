@@ -16,7 +16,6 @@ router = APIRouter(prefix="/info",
                    tags=["Info"],
                    responses={
                        401: {'name': 'Unauthorized'}
-
                    })
 
 

@@ -44,10 +44,21 @@ class AdService():
         else:
             raise exception
 
-    def get_ad_by_id_and_provider(self, id: int, provider: Provider):
+    def get_ad_by_id_and_provider(self, id: int, provider: Provider) -> ad_schema.Ad:
         match provider:
             case Provider.AUTORIA:
-                return self.autoria_repo.get_ad(id)
+                ad_model_ = self.autoria_repo.get_ad(id)
+                return ad_schema.Ad(
+                    id=ad_model_.id,
+                    platform=ad_model_.platform,
+                    category=ad_model_.category,
+                    brand=ad_model_.brand,
+                    model=ad_model_.model,
+                    price=ad_model_.price,
+                    region=ad_model_.region,
+                    mileage=ad_model_.mileage,
+                    color=ad_model_.color
+                )
 
     def save_ad(self, username: str, id: int, provider: Provider) -> ad_model.AdModel:
         ad = None

@@ -37,7 +37,7 @@ async def get_ad_from_provider_by_id(current_user: Annotated[User, Depends(auth.
                                          description='Info provider', example='autoria'),
                                      id: int = Path(),
                                      service: AdService = Depends(get_ad_service)):
-    service.get_ad_by_id_and_provider(id, verify_provider(provider))
+    return service.get_ad_by_id_and_provider(id, verify_provider(provider))
 
 
 @router.post("")
